@@ -12,7 +12,6 @@ from config import (
     GROQ_MODEL, GEMINI_MODEL, MISTRAL_MODEL, MAX_TOKENS
 )
 
-# Initialize clients once at startup
 groq_client    = groq.Groq(api_key=GROQ_API_KEY)
 mistral_client = Mistral(api_key=MISTRAL_API_KEY)
 genai.configure(api_key=GEMINI_API_KEY)
@@ -34,7 +33,6 @@ def call_groq(messages: list) -> str:
 def call_gemini(messages: list) -> str:
     """Send a conversation to Gemini and return the reply as a string."""
     try:
-        # Gemini uses a different format — extract system prompt and history
         system_prompt = ""
         chat_history  = []
 
@@ -46,14 +44,12 @@ def call_gemini(messages: list) -> str:
             elif msg["role"] == "assistant":
                 chat_history.append({"role": "model", "parts": [msg["content"]]})
 
-        model = genai.GenerativeModel(
+        model    = genai.GenerativeModel(
             model_name=GEMINI_MODEL,
             system_instruction=system_prompt
         )
-
-        # Send everything except the last user message as history
-        chat    = model.start_chat(history=chat_history[:-1])
-        last    = chat_history[-1]["parts"][0]
+        chat     = model.start_chat(history=chat_history[:-1])
+        last     = chat_history[-1]["parts"][0]
         response = chat.send_message(last)
         return response.text
     except Exception as e:
@@ -74,26 +70,18 @@ def call_mistral(messages: list) -> str:
 
 
 def call_all_models(prompt: str, system_prompt: str) -> dict:
-    """
-    Send the same prompt to all 3 models simultaneously.
-    Returns a dict with each model's reply and response time in ms.
-    Used by the /compare endpoint for benchmarking.
-    """
+    """Send the same prompt to all 3 models. Used by /compare for benchmarking."""
     results = {}
-    models  = [
-        ("groq",    call_groq),
-        ("gemini",  call_gemini),
-        ("mistral", call_mistral),
-    ]
+    models  = [("groq", call_groq), ("gemini", call_gemini), ("mistral", call_mistral)]
 
     for name, fn in models:
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user",   "content": prompt}
         ]
-        start           = time.time()
-        reply           = fn(messages)
-        elapsed         = round((time.time() - start) * 1000)
-        results[name]   = {"reply": reply, "time_ms": elapsed}
+        start         = time.time()
+        reply         = fn(messages)
+        elapsed       = round((time.time() - start) * 1000)
+        results[name] = {"reply": reply, "time_ms": elapsed}
 
     return results
