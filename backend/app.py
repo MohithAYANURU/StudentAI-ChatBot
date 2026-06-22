@@ -1,52 +1,132 @@
 """
-app.py — Flask server for StudentOS.
-Defines all API endpoints. Business logic lives in models.py and prompts.py.
+app.py — Refactored Flask server for StudentOS.
+Supports standard text messaging and text-based file uploads (PDF) for CV analysis.
 """
 
+import io
 from flask import Flask, request, jsonify, session
 from flask_cors import CORS
+from pypdf import PdfReader
 from config import SECRET_KEY
 from prompts import get_prompt
 from models import call_groq, call_all_models
+
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
 CORS(app, supports_credentials=True)
 
 
+def extract_text_from_pdf(file_bytes):
+    """Reads PDF binary streams and extracts textual data strings."""
+    try:
+        reader = PdfReader(io.BytesIO(file_bytes))
+        extracted_text = []
+        for page in reader.pages:
+            text = page.extract_text()
+            if text:
+                extracted_text.append(text)
+        return "\n".join(extracted_text).strip()
+    except Exception as e:
+        print(f"PDF extraction subsystem fault: {str(e)}")
+        return ""
+
+
 @app.route("/chat", methods=["POST"])
 def chat():
     """
-    Receive a message and mode from the frontend.
-    Maintain conversation history in the session.
-    Return the AI reply as JSON.
+    Receive message and mode. Manages mode state using Flask sessions
+    and handles modular text parsing for file uploads.
     """
-    data    = request.get_json()
-    message = data.get("message", "").strip()
-    mode    = data.get("mode", "concept")
+    # 1. Initialize core contextual variables
+    input_mode = None
+    message = ""
+    file_context = ""
 
-    if not message:
-        return jsonify({"error": "Message cannot be empty"}), 400
+    # 2. Extract input text and files from multi-part or JSON payloads
+    if request.files or request.form:
+        input_mode = request.form.get("mode")
+        message = request.form.get("message", "").strip()
+        
+        # Access the file safely using native Flask/Werkzeug request bindings
+        uploaded_file = request.files.get("file")
+        if uploaded_file and uploaded_file.filename != "":
+            if uploaded_file.filename.lower().endswith('.pdf'):
+                # Read file stream safely into bytes directly out of memory
+                file_bytes = uploaded_file.read()
+                pdf_text = extract_text_from_pdf(file_bytes)
+                
+                if pdf_text:
+                    # Keep file context separate so it doesn't corrupt clean message history
+                    file_context = f"\n\n[ATTACHED DOCUMENT CONTEXT]:\n{pdf_text}\n"
+                else:
+                    return jsonify({"error": "Unable to extract raw text content from the uploaded PDF."}), 422
+            else:
+                return jsonify({"error": "Unsupported file layout format. Please provide a standard .pdf document."}), 400
+    
+    # Fallback to pure JSON request processing
+    else:
+        data = request.get_json() or {}
+        message = data.get("message", "").strip()
+        input_mode = data.get("mode")
 
-    # Initialize session history if first message
+    # Guard clause: Ensure we have at least text or an uploaded file
+    if not message and not file_context:
+        return jsonify({"error": "Message parameter context string or file attachment cannot be empty"}), 400
+
+    # 3. Handle Session State Initialization
     if "history" not in session:
         session["history"] = []
-        session["mode"]    = mode
+    if "mode" not in session:
+        session["mode"] = "concept"  # Global application default fallback
 
-    # Build the full message list: system prompt + history + new message
-    messages = [{"role": "system", "content": get_prompt(mode)}]
+    # 4. Text Command Interception & State Routing Logic
+    clean_msg = message.lower().strip()
+    if clean_msg == "cv":
+        session["mode"] = "cv"
+    elif "internship" in clean_msg or "find internships" in clean_msg:
+        session["mode"] = "internship"
+    elif "concept" in clean_msg or "explain" in clean_msg:
+        session["mode"] = "concept"
+    elif "exam" in clean_msg or "quiz" in clean_msg:
+        session["mode"] = "exam"
+    # If the client frontend explicitly passed a valid mode payload, respect it
+    elif input_mode and input_mode in ["concept", "exam", "cv", "internship"]:
+        session["mode"] = input_mode
+
+    # 5. Build the AI Payload
+    # Always pull the active system prompt dynamically from the persistent session state
+    current_mode = session["mode"]
+    messages = [{"role": "system", "content": get_prompt(current_mode)}]
+    
+    # Inject past conversation logs
     messages += session["history"]
-    messages.append({"role": "user", "content": message})
+    
+    # Formulate current outgoing prompt block
+    current_user_payload = message
+    if file_context:
+        if message:
+            current_user_payload = f"{message}\n{file_context}".strip()
+        else:
+            current_user_payload = f"Analyze attached document:{file_context}"
+    
+    messages.append({"role": "user", "content": current_user_payload})
 
-    # Call Groq and get the reply
-    reply = call_groq(messages)
+    # 6. Dispatch Context Request to AI Runtime
+    try:
+        reply = call_groq(messages)
+    except Exception as e:
+        print(f"AI Model runtime inference exception: {str(e)}")
+        return jsonify({"error": "Failed to generate AI response payload."}), 500
 
-    # Save to session history
-    session["history"].append({"role": "user",      "content": message})
+    # 7. Update Session State History Safely
+    # Log clean user text strings to memory arrays—NOT the giant raw PDF context block
+    history_user_string = message if message else "[Uploaded Document]"
+    session["history"].append({"role": "user", "content": history_user_string})
     session["history"].append({"role": "assistant", "content": reply})
     session.modified = True
 
-    return jsonify({"reply": reply, "mode": mode})
+    return jsonify({"reply": reply, "mode": current_mode})
 
 
 @app.route("/history", methods=["GET"])
@@ -68,7 +148,7 @@ def compare():
     Send the same prompt to Groq, Gemini and Mistral.
     Return all 3 replies and their response times for benchmarking.
     """
-    data          = request.get_json()
+    data          = request.get_json() or {}
     prompt        = data.get("prompt", "").strip()
     system_prompt = data.get("system_prompt", "You are a helpful assistant.")
 

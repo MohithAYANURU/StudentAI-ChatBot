@@ -12,6 +12,7 @@ GROQ_API_KEY = os.getenv('GROQ_API_KEY')
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 MISTRAL_API_KEY = os.getenv('MISTRAL_API_KEY')
 
+
 #Flask secret key
 SECRET_KEY = os.getenv('SECRET_KEY' , "fallback_secret_key")
 
