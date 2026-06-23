@@ -1,21 +1,8 @@
-/**
- * app.js — StudentOS frontend logic
- *
- * IMPORTANT: every fetch() call to the backend MUST include
- * `credentials: "include"`. Without it, the browser will NOT send the
- * Flask session cookie back on each request, and the backend will think
- * every message is a brand new conversation — this was the root cause
- * of the "AI forgets everything" bug.
- *
- * This file must be served from a local server (e.g. VS Code Live Server,
- * http://127.0.0.1:5500), NOT opened directly as a file:// path — some
- * browsers block cookies entirely for file:// origins even with
- * credentials included.
- */
 
-const API = "http://localhost:5000";
 
-// ── Mode configuration ───────────────────────────────────────
+const API = "http://127.0.0.1:5000";
+
+
 const MODES = {
   concept: {
     label: "Concept Explainer",
@@ -62,14 +49,12 @@ const MODES = {
   }
 };
 
-// ── Read mode from URL ───────────────────────────────────────
-// NOTE: index.html links must use ?mode=intern, NOT ?mode=internship —
-// the key here matches prompts.py exactly.
+
 const params = new URLSearchParams(window.location.search);
 const mode   = params.get("mode") || "concept";
 const config = MODES[mode] || MODES["concept"];
 
-// ── Markdown renderer ────────────────────────────────────────
+
 function escapeHtml(text) {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
@@ -87,7 +72,7 @@ function renderMarkdown(text) {
   return text.replace(/\n/g, "<br>");
 }
 
-// ── File attachment ──────────────────────────────────────────
+
 function triggerFileSelect() {
   const fileInput = document.getElementById("file-input");
   if (fileInput) fileInput.click();
@@ -106,7 +91,7 @@ function updateFileIndicator() {
   }
 }
 
-// ── Page setup ───────────────────────────────────────────────
+
 document.addEventListener("DOMContentLoaded", () => {
 
   const badge = document.getElementById("mode-badge") || document.getElementById("mode-tag");
@@ -157,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.title = `StudentOS — ${config.label}`;
 });
 
-// ── Add a chat bubble ────────────────────────────────────────
+
 function addBubble(text, role, asHtml = false) {
   const empty = document.getElementById("empty-state");
   if (empty) empty.remove();
@@ -177,7 +162,7 @@ function addBubble(text, role, asHtml = false) {
   return bubble;
 }
 
-// ── Send message ─────────────────────────────────────────────
+
 async function sendMessage() {
   const input     = document.getElementById("user-input");
   const fileInput = document.getElementById("file-input");
