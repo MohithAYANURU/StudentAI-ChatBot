@@ -10,12 +10,19 @@ from pypdf import PdfReader
 from config import SECRET_KEY
 from prompts import get_prompt
 from models import call_groq, call_all_models
-
+from auth import auth_bp, login_required, admin_required
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
+
+app.config.update(
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+)
 CORS(app, supports_credentials=True)
 
+app.register_blueprint(auth_bp, url_prefix='/auth')
 
 def extract_text_from_pdf(file_bytes):
     """Reads PDF binary streams and extracts textual data strings."""
@@ -33,6 +40,7 @@ def extract_text_from_pdf(file_bytes):
 
 
 @app.route("/chat", methods=["POST"])
+@login_required
 def chat():
     """
     Receive message and mode. Manages mode state using Flask sessions
@@ -130,12 +138,14 @@ def chat():
 
 
 @app.route("/history", methods=["GET"])
+@login_required
 def history():
     """Return the current session's conversation history."""
     return jsonify({"history": session.get("history", [])})
 
 
 @app.route("/reset", methods=["POST"])
+@login_required
 def reset():
     """Clear the session history and start fresh."""
     session.clear()
@@ -143,6 +153,7 @@ def reset():
 
 
 @app.route("/compare", methods=["POST"])
+@login_required 
 def compare():
     """
     Send the same prompt to Groq, Gemini and Mistral.
@@ -158,6 +169,15 @@ def compare():
     results = call_all_models(prompt, system_prompt)
     return jsonify(results)
 
+@app.route("/admin/system-status", methods=["GET"])
+@admin_required
+def system_status():
+    """Protected dashboard for administrative users only."""
+    return jsonify({
+        "status": "online",
+        "active_sessions": len(session),
+        "message": "Authorized admin access granted."
+    })
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
