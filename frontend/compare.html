@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>StudentAI-ChatBot — Benchmark</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    .page-wrap  { max-width: 1100px; margin: 0 auto; padding: 48px 24px; }
+    .page-title { font-size: 24px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.02em; }
+    .page-sub   { font-size: 14px; color: var(--text-secondary); margin-bottom: 32px; }
+
+    .input-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+    .input-section label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .input-section textarea {
+      width: 100%;
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 12px 16px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: inherit;
+      resize: vertical;
+      outline: none;
+      min-height: 80px;
+      transition: border-color 0.1s;
+      margin-bottom: 16px;
+    }
+    .input-section textarea:focus { border-color: var(--border-focus); }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 768px) { .results-grid { grid-template-columns: 1fr; } }
+
+    .model-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 20px;
+    }
+    .model-card.groq    { border-top: 3px solid #f97316; }
+    .model-card.gemini  { border-top: 3px solid #22c55e; }
+    .model-card.mistral { border-top: 3px solid #a855f7; }
+
+    .model-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+    .model-name { font-size: 13px; font-weight: 600; }
+    .model-tag {
+      font-size: 11px; padding: 2px 6px; border-radius: 4px;
+      font-weight: 500; background: var(--bg-main); border: 1px solid var(--border);
+    }
+    .groq    .model-tag { color: #f97316; }
+    .gemini  .model-tag { color: #22c55e; }
+    .mistral .model-tag { color: #a855f7; }
+
+    .model-reply {
+      font-size: 13px; color: var(--text-secondary);
+      line-height: 1.6; white-space: pre-wrap; min-height: 120px;
+    }
+    .model-time {
+      margin-top: 16px; padding-top: 12px;
+      border-top: 1px solid var(--border);
+      font-size: 11px; color: var(--text-muted);
+    }
+    .model-time span { font-weight: 600; color: var(--text-secondary); }
+    .loading-text { color: var(--text-muted); font-style: italic; font-size: 13px; }
+
+    .presets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .preset-btn {
+      background: var(--bg-main); border: 1px solid var(--border);
+      border-radius: 4px; color: var(--text-secondary);
+      font-size: 12px; padding: 5px 12px; cursor: pointer; transition: all 0.1s;
+    }
+    .preset-btn:hover { color: var(--text-primary); border-color: var(--border-focus); }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-brand">StudentAI-ChatBot</div>
+    <div class="navbar-links">
+      <a href="index.html">Home</a>
+      <a href="compare.html">Benchmark</a>
+      <a href="#" onclick="navLogout()" style="font-size:12px;color:var(--text-secondary)">Logout</a>
+    </div>
+  </nav>
+
+  <div class="page-wrap">
+    <h1 class="page-title"> Model Benchmark</h1>
+    <p class="page-sub">Send the same prompt to Groq (Llama 3.1), Gemini 2.0 Flash and Mistral Small — compare quality and speed.</p>
+
+    <div class="input-section">
+      <label>Quick presets</label>
+      <div class="presets">
+        <button class="preset-btn" onclick="setPrompt('Explain recursion to a beginner with a simple example.')">Explain recursion</button>
+        <button class="preset-btn" onclick="setPrompt('What is the difference between a stack and a queue?')">Stack vs Queue</button>
+        <button class="preset-btn" onclick="setPrompt('Give me 3 interview questions about time complexity.')">Interview questions</button>
+        <button class="preset-btn" onclick="setPrompt('What are the best CS internship tips for students in France?')">Internship tips</button>
+      </div>
+
+      <label>Your prompt</label>
+      <textarea id="prompt-input" placeholder="Type any question and compare how each model answers…"></textarea>
+
+      <button class="btn btn-primary" onclick="runComparison()" id="compare-btn">
+         ⚡ Compare all 3 models
+      </button>
+    </div>
+
+    <div class="results-grid" id="results" style="display:none">
+      <div class="model-card groq">
+        <div class="model-header">
+          <div class="model-name">Groq</div>
+          <span class="model-tag">Llama 3.1 8B</span>
+        </div>
+        <div class="model-reply" id="groq-reply">—</div>
+        <div class="model-time">Response time: <span id="groq-time">—</span></div>
+      </div>
+
+      <div class="model-card gemini">
+        <div class="model-header">
+          <div class="model-name">Gemini</div>
+          <span class="model-tag">2.0 Flash</span>
+        </div>
+        <div class="model-reply" id="gemini-reply">—</div>
+        <div class="model-time">Response time: <span id="gemini-time">—</span></div>
+      </div>
+
+      <div class="model-card mistral">
+        <div class="model-header">
+          <div class="model-name">Mistral</div>
+          <span class="model-tag">Small Latest</span>
+        </div>
+        <div class="model-reply" id="mistral-reply">—</div>
+        <div class="model-time">Response time: <span id="mistral-time">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = "http://127.0.0.1:5000";
+
+    
+    function renderMarkdown(text) {
+      if (!text) return "No response.";
+      let html = text.replace(/```(\w+)?\n?([\s\S]*?)```/g, (_, __, code) => `<pre><code>${code.trim()}</code></pre>`);
+      html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
+      html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+      html = html.replace(/\n/g, "<br>");
+      return html;
+    }
+
+    async function navLogout() {
+      try {
+        await fetch(`${API}/logout`, { method: "POST", credentials: "include" });
+      } catch (e) { console.error(e); }
+      window.location.href = "login.html";
+    }
+
+    function setPrompt(text) {
+      document.getElementById("prompt-input").value = text;
+    }
+
+    async function runComparison() {
+      const prompt = document.getElementById("prompt-input").value.trim();
+      if (!prompt) return alert("Please enter a prompt first.");
+
+      const btn     = document.getElementById("compare-btn");
+      const results = document.getElementById("results");
+
+      btn.disabled          = true;
+      btn.textContent       = "Running…";
+      results.style.display = "grid";
+
+      
+      ["groq", "gemini", "mistral"].forEach(m => {
+        document.getElementById(`${m}-reply`).innerHTML  = '<span class="loading-text">Waiting for response…</span>';
+        document.getElementById(`${m}-time`).textContent = "—";
+      });
+
+      try {
+        const res = await fetch(`${API}/compare`, {
+          method:      "POST",
+          headers:     { "Content-Type": "application/json" },
+          credentials: "include",
+          body:        JSON.stringify({ prompt, system_prompt: "You are a helpful assistant for CS students." })
+        });
+
+        
+        if (res.status === 401) { window.location.href = "login.html"; return; }
+
+        const data = await res.json();
+
+        
+        ["groq", "gemini", "mistral"].forEach(m => {
+          const replyText = data[m]?.reply;
+          const timeMs = data[m]?.time_ms;
+          
+          document.getElementById(`${m}-reply`).innerHTML = replyText ? renderMarkdown(replyText) : "No response.";
+          
+          document.getElementById(`${m}-time`).textContent  = timeMs ? `${(timeMs / 1000).toFixed(2)} s` : "—";
+        });
+
+      } catch (err) {
+        ["groq", "gemini", "mistral"].forEach(m => {
+          document.getElementById(`${m}-reply`).textContent = "Error: could not reach server. Is app.py running?";
+        });
+      }
+
+      btn.disabled    = false;
+      btn.textContent = "⚡ Compare all 3 models";
+    }
+  </script>
+
+</body>
+</html>

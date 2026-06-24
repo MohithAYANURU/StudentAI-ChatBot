@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>StudentAI-ChatBot — Login</title>
+  <title>StudentAI-ChatBot - Login</title>
   <link rel="stylesheet" href="style.css"/>
   <style>
     .auth-layout {
@@ -73,7 +73,7 @@
       transition: background 0.1s;
     }
     .auth-btn:hover { background: #27272a; }
-    
+
     #auth-error {
       color: #ef4444;
       font-size: 12px;
@@ -81,7 +81,7 @@
       margin-top: 12px;
       min-height: 18px;
     }
-    
+
     .demo-credentials {
       margin-top: 24px;
       padding-top: 16px;
@@ -105,7 +105,7 @@
     <div class="auth-card">
       <h2>Welcome Back</h2>
       <p>Log in to access your StudentAI-Chatbot.</p>
-      
+
       <form id="login-form">
         <div class="input-group">
           <label>Email Address</label>
@@ -113,17 +113,16 @@
         </div>
         <div class="input-group">
           <label>Password</label>
-          <input type="password" id="password" required placeholder="••••••••" />
+          <input type="password" id="password" required placeholder="Password" />
         </div>
         <button type="submit" class="auth-btn" id="login-btn">Log In</button>
       </form>
-      
+
       <div id="auth-error"></div>
-      
+
       <div class="demo-credentials">
         <strong>Demo Accounts:</strong><br>
-        Student: student@epita.fr / Student2026!<br>
-        
+        Student: student@epita.fr / Student2026!
       </div>
     </div>
   </div>
@@ -131,12 +130,12 @@
   <script>
     document.getElementById("login-form").addEventListener("submit", async (e) => {
       e.preventDefault();
-      
+
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
       const errorDiv = document.getElementById("auth-error");
       const btn = document.getElementById("login-btn");
-      
+
       btn.disabled = true;
       btn.textContent = "Logging in...";
       errorDiv.textContent = "";
@@ -145,7 +144,7 @@
         const res = await fetch("http://127.0.0.1:5000/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          credentials: "include", 
+          credentials: "include",
           body: JSON.stringify({ email, password })
         });
 

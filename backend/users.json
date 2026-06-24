@@ -1,0 +1,10 @@
+{
+  "admin@epita.fr": {
+    "password_hash": "scrypt:32768:8:1$4NCtDmhhA4y7oaXD$dbbd53cc0ab4757adc3ff4df138fdb172e1ce6290bfee5a349329720a0039e45927861c38c1781a1df52de786164b0f19458a1a3ad414fa651132ccf8c2d6879",
+    "role": "admin"
+  },
+  "student@epita.fr": {
+    "password_hash": "scrypt:32768:8:1$srpdsYp5IwcJmong$1b5879b2d4695ebdf7c00e4184805eafca82d556940297576852b8b1f7f6758a44891de85fd3470dde3d47ba52396907f8980ac5e4e22d07ef7a3eed4b2abb29",
+    "role": "student"
+  }
+}
