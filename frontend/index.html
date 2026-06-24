@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>StudentAI-ChatBot for CS Students</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    .hero {
+      text-align: center;
+      padding: 96px 24px 48px;
+    }
+    .hero-tag {
+      display: inline-block;
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px 12px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .hero h1 span { color: var(--text-secondary); }
+    .hero p {
+      font-size: 15px;
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+    }
+    .modes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+    .mode-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 28px 24px;
+      cursor: pointer;
+      transition: all 0.1s ease;
+      text-align: left;
+    }
+    .mode-card:hover {
+      background: var(--bg-main);
+      border-color: var(--border-focus);
+    }
+
+    .mode-icon {
+      font-size: 22px;
+      margin-bottom: 14px;
+    }
+    .mode-card h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .mode-card p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    .mode-card .launch-btn {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--bg-main);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.1s ease;
+    }
+    .mode-card:hover .launch-btn {
+      background: var(--text-primary);
+      color: var(--bg-main);
+      border-color: var(--text-primary);
+    }
+
+    .compare-banner {
+      max-width: 960px;
+      margin: 0 auto 80px;
+      padding: 0 24px;
+    }
+    .compare-inner {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 24px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .compare-inner h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .compare-inner p  { font-size: 13px; color: var(--text-secondary); }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-brand">StudentAI-ChatBot</div>
+    <div class="navbar-links">
+      <a href="index.html">Home</a>
+      <a href="compare.html">Benchmark</a>
+      <a href="https://github.com/MohithAYANURU/StudentAI-ChatBot" target="_blank">GitHub</a>
+      <a href="login.html" style="color: var(--text-primary); font-weight: 500;">Login →</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1>Your AI guider<br/>for <span>Student Life</span></h1>
+    <p>Four specialized modes in one app — understand concepts, ace exams, polish your CV, and find the right internships.</p>
+  </section>
+
+  <div class="modes-grid">
+
+    <div class="mode-card concept" onclick="location.href='chat.html?mode=concept'">
+      <div class="mode-icon">🧠</div>
+      <h3>Concept Explainer</h3>
+      <p>Explain any CS topic at your level — beginner to advanced — with examples and code.</p>
+      <button class="launch-btn">Open →</button>
+    </div>
+
+    <div class="mode-card exam" onclick="location.href='chat.html?mode=exam'">
+      <div class="mode-icon">📝</div>
+      <h3>Exam Coach</h3>
+      <p>Paste your notes and get a custom quiz. Answer, get graded, and learn from mistakes.</p>
+      <button class="launch-btn">Open →</button>
+    </div>
+
+    <div class="mode-card cv" onclick="location.href='chat.html?mode=cv'">
+      <div class="mode-icon">📄</div>
+      <h3>CV Reviewer</h3>
+      <p>Get structured, honest feedback on your CV tailored for tech internship applications.</p>
+      <button class="launch-btn">Open →</button>
+    </div>
+
+    <div class="mode-card internship" onclick="location.href='chat.html?mode=intern'">
+      <div class="mode-icon">🗺️</div>
+      <h3>Internship Finder</h3>
+      <p>Tell the AI your profile and get a personalised list of companies to target with tips.</p>
+      <button class="launch-btn">Open →</button>
+    </div>
+
+  </div>
+
+  <div class="compare-banner">
+    <div class="compare-inner">
+      <div>
+        <h3> Model Benchmark</h3>
+        <p>Compare Groq, Gemini and Mistral side-by-side on the same prompt.</p>
+      </div>
+      <button class="btn btn-primary" onclick="location.href='compare.html'">Open Benchmark →</button>
+    </div>
+  </div>
+
+</body>
+</html>

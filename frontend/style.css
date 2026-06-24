@@ -1,0 +1,224 @@
+/* ==========================================================================
+   style.css — High-Contrast Monochromatic Light Mode Architecture
+   ========================================================================== */
+
+:root {
+  --bg-main:        #ffffff; /* Clean pure white canvas */
+  --bg-card:        #fafafa; /* Minimal cold grey card surfaces */
+  --bg-input:       #ffffff;
+  --bg-hover:       #f4f4f5; /* Zinc 100 slate hover states */
+  --border:         #e4e4e7; /* Zinc 200 light grid dividers */
+  --border-light:   #f4f4f5;
+  --border-focus:   #71717a; /* Zinc 500 active interactive border */
+  
+  --text-primary:   #09090b; /* Zinc 950 deep ink-black text */
+  --text-secondary: #52525b; /* Zinc 600 dark neutral body copy */
+  --text-muted:     #a1a1aa; /* Zinc 400 clean tertiary details */
+  --accent:         #18181b; /* Pure monochromatic heavy black accents */
+  --accent-glow:    rgba(24, 24, 27, 0.05);
+
+  /* Clean subtle context indicators instead of neon glow bars */
+  --concept:    #4f46e5;
+  --exam:       #059669;
+  --cv:         #d97706;
+  --internship: #2563eb;
+}
+
+* { 
+  margin: 0; 
+  padding: 0; 
+  box-sizing: border-box; 
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg-main);
+  color: var(--text-primary);
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* ── Minimalist Scrollbars ── */
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ── Global Layout Elements ── */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 56px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.navbar-brand {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.navbar-brand::before {
+  content: '';
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--text-primary);
+}
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.navbar-links a {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: all 0.1s ease;
+}
+.navbar-links a:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+/* ── Developer Button Elements ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  background: var(--bg-main);
+  color: var(--text-primary);
+  transition: all 0.1s ease;
+  font-family: inherit;
+}
+.btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--text-muted);
+}
+.btn-primary {
+  background: var(--text-primary);
+  color: var(--bg-main);
+  border: 1px solid var(--text-primary);
+}
+.btn-primary:hover {
+  background: #27272a;
+}
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+.btn-ghost:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+/* ── Minimalist Indicator Badges ── */
+.mode-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+}
+.mode-badge.concept    { border-left: 3px solid var(--concept); }
+.mode-badge.exam       { border-left: 3px solid var(--exam); }
+.mode-badge.cv         { border-left: 3px solid var(--cv); }
+.mode-badge.internship { border-left: 3px solid var(--internship); }
+
+/* ── Structural Activity Log Stream (Replaces Speach Bubbles) ── */
+.message-row {
+  width: 100%;
+  display: flex;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+.bubble {
+  max-width: 100%;
+  width: 100%;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+}
+.bubble::before {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+.bubble.user {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+.bubble.user::before {
+  content: "User Input";
+  color: var(--text-secondary);
+}
+.bubble.assistant {
+  color: var(--text-secondary);
+}
+.bubble.assistant::before {
+  content: "System Response";
+  color: var(--text-primary);
+}
+.bubble.typing { 
+  color: var(--text-muted); 
+  font-style: italic; 
+}
+.bubble.typing::before {
+  content: "Processing Threads...";
+}
+
+/* ── Precise Code block Layouts ── */
+.bubble strong { color: var(--text-primary); font-weight: 600; }
+.bubble code {
+  font-family: Menlo, Consolas, 'Fira Code', monospace;
+  font-size: 13px;
+  background: var(--bg-hover);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+.bubble pre {
+  background: #f8f9fa;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 14px;
+  margin: 12px 0;
+  overflow-x: auto;
+}
+.bubble pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--text-primary);
+}

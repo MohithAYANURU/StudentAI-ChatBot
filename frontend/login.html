@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>StudentAI-ChatBot — Login</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    .auth-layout {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 56px);
+      padding: 24px;
+    }
+    .auth-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 32px 40px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .auth-card h2 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    .auth-card p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .input-group {
+      margin-bottom: 16px;
+    }
+    .input-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 14px;
+      transition: border-color 0.1s;
+    }
+    .input-group input:focus {
+      border-color: var(--border-focus);
+      outline: none;
+    }
+    .auth-btn {
+      width: 100%;
+      padding: 10px;
+      background: var(--text-primary);
+      color: var(--bg-main);
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.1s;
+    }
+    .auth-btn:hover { background: #27272a; }
+    
+    #auth-error {
+      color: #ef4444;
+      font-size: 12px;
+      text-align: center;
+      margin-top: 12px;
+      min-height: 18px;
+    }
+    
+    .demo-credentials {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-brand">StudentAI-ChatBot</div>
+    <div class="navbar-links">
+      <a href="index.html">Home</a>
+    </div>
+  </nav>
+
+  <div class="auth-layout">
+    <div class="auth-card">
+      <h2>Welcome Back</h2>
+      <p>Log in to access your StudentAI-Chatbot.</p>
+      
+      <form id="login-form">
+        <div class="input-group">
+          <label>Email Address</label>
+          <input type="email" id="email" required placeholder="student@epita.fr" />
+        </div>
+        <div class="input-group">
+          <label>Password</label>
+          <input type="password" id="password" required placeholder="••••••••" />
+        </div>
+        <button type="submit" class="auth-btn" id="login-btn">Log In</button>
+      </form>
+      
+      <div id="auth-error"></div>
+      
+      <div class="demo-credentials">
+        <strong>Demo Accounts:</strong><br>
+        Student: student@epita.fr / Student2026!<br>
+        Admin: admin@epita.fr / Admin2026!
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("login-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const errorDiv = document.getElementById("auth-error");
+      const btn = document.getElementById("login-btn");
+      
+      btn.disabled = true;
+      btn.textContent = "Logging in...";
+      errorDiv.textContent = "";
+
+      try {
+        const res = await fetch("http://127.0.0.1:5000/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include", 
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          window.location.href = "index.html";
+        } else {
+          errorDiv.textContent = data.error || "Login failed.";
+        }
+      } catch (err) {
+        errorDiv.textContent = "Cannot connect to server. Is app.py running?";
+      }
+
+      btn.disabled = false;
+      btn.textContent = "Log In";
+    });
+  </script>
+</body>
+</html>
